@@ -4,7 +4,7 @@ import './index.css';
 import IdealWeightCalculator from './IdealWeightCalculator';
 import AppointmentBookingForm from './AppointmentBookingForm';
 import AdminScreen from './AdminScreen';
-import AdminLogin from './AdminLogin';
+import AdminLogin from './Adminlogin';
 import { auth } from './Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import logo from './assets/mrhealth.png';
@@ -44,7 +44,7 @@ function App() {
         </main>
 
         <footer className="bg-green-500 text-white text-center p-4">
-          <p>&copy; 2025 Health App | All rights reserved</p>
+          
         </footer>
       </div>
     </Router>

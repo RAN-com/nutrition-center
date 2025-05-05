@@ -104,6 +104,7 @@ const AppointmentBookingForm = () => {
       <option value="heartHealth" className="py-1">❤️ Heart Health</option>
       <option value="fatCheckup" className="py-1">🔍 Fat Checkup</option>
       <option value="wholeBodyCheckup" className="py-1">🧍 Whole Body Checkup</option>
+      <option value="wholeBodyCheckup" className="py-1">🧍 Health Consulting</option>
     </select>
     <p className="text-xs text-gray-500 mt-1">Hold Ctrl (Windows) or ⌘ (Mac) to select multiple options.</p>
   </div>
