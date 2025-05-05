@@ -6,7 +6,6 @@ const AdminScreen = () => {
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
 
-  // Fetch appointments from Firestore
   useEffect(() => {
     (async () => {
       try {
@@ -19,7 +18,6 @@ const AdminScreen = () => {
     })();
   }, []);
 
-  // Fetch reports from Firestore
   useEffect(() => {
     const fetchReports = async () => {
       const snapshot = await getDocs(collection(db, 'reports'));
@@ -30,7 +28,6 @@ const AdminScreen = () => {
     fetchReports();
   }, []);
 
-  // Mark appointment as completed
   const handleMarkAsCompleted = async (id) => {
     try {
       const appointmentRef = doc(db, 'appointments', id);
@@ -46,7 +43,6 @@ const AdminScreen = () => {
     }
   };
 
-  // Send WhatsApp message for appointment
   const handleSendWhatsApp = (appointment) => {
     const { name, number, date, services = [] } = appointment;
 
@@ -69,7 +65,6 @@ MrHealth Nutrition Centre`;
     window.open(whatsappURL, '_blank');
   };
 
-  // Send WhatsApp message for report
   const handleSendReportWhatsApp = (report) => {
     const { name, bmi, bmr, bodyFat, idealWeight, weightStatus, phoneNumber } = report;
 
@@ -92,50 +87,59 @@ MrHealth Nutrition Centre`;
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
       <h2 className="text-3xl font-bold text-center text-indigo-700 mb-6">Admin Panel</h2>
 
       {/* Appointment List Section */}
       <h3 className="text-xl font-semibold mb-4 text-gray-700">Appointment List</h3>
-      <ul className="space-y-4">
-        {appointments.map((appointment) => (
-          <li key={appointment.id} className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-            <p className="font-semibold text-lg text-indigo-600">
-              {appointment.name} – {appointment.number} – {appointment.date}
-            </p>
-            <p className="text-sm text-gray-600 mb-1">
-              Status: <span className="font-medium">{appointment.status}</span>
-            </p>
-            <p className="text-sm text-gray-600 mb-3">
-              <strong>Services:</strong>{' '}
-              {appointment.services && appointment.services.length > 0
-                ? appointment.services.join(', ')
-                : 'None'}
-            </p>
-
-            <div className="flex flex-wrap gap-3">
-              {appointment.status !== 'Completed' && (
-                <button
-                  onClick={() => handleMarkAsCompleted(appointment.id)}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                >
-                  Mark as Completed
-                </button>
-              )}
-
-              <button
-                onClick={() => handleSendWhatsApp(appointment)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                Send WhatsApp Message
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="overflow-auto bg-white rounded-xl shadow-lg mb-8">
+        <table className="min-w-full table-auto border text-sm">
+          <thead className="bg-indigo-600 text-white">
+            <tr>
+              <th className="p-2">Name</th>
+              <th className="p-2">Number</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Services</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {appointments.map((appointment) => (
+              <tr key={appointment.id} className="border-t">
+                <td className="p-2 font-medium">{appointment.name}</td>
+                <td className="p-2">{appointment.number}</td>
+                <td className="p-2">{appointment.date}</td>
+                <td className="p-2">
+                  {appointment.services && appointment.services.length > 0
+                    ? appointment.services.join(', ')
+                    : 'None'}
+                </td>
+                <td className="p-2">{appointment.status}</td>
+                <td className="p-2 space-y-2">
+                  {appointment.status !== 'Completed' && (
+                    <button
+                      onClick={() => handleMarkAsCompleted(appointment.id)}
+                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 mr-2"
+                    >
+                      Mark as Completed
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleSendWhatsApp(appointment)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                  >
+                    WhatsApp
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Reports Section */}
-      <h3 className="text-xl font-semibold mb-4 text-gray-700 mt-6">Health Reports</h3>
+      <h3 className="text-xl font-semibold mb-4 text-gray-700">Health Reports</h3>
       <div className="overflow-auto bg-white rounded-xl shadow-lg">
         <table className="min-w-full table-auto border text-sm">
           <thead className="bg-indigo-600 text-white">

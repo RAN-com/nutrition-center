@@ -31,7 +31,7 @@ function App() {
           <h1 className="text-2xl font-bold underline text-green-700">Nutrition Centre</h1>
         </header>
 
-        <main className="container my-4">
+        <main className="container my-10">
           <Routes>
             <Route path="/" element={<IdealWeightCalculator />} />
             <Route path="/book-appointment" element={<AppointmentBookingForm />} />
