@@ -4,7 +4,7 @@ import './index.css';
 import IdealWeightCalculator from './IdealWeightCalculator';
 import AppointmentBookingForm from './AppointmentBookingForm';
 import AdminScreen from './AdminScreen';
-import AdminLogin from './AdminLogin';
+import AdminLogin from './Login';
 import { auth } from './Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import logo from './assets/mrhealth.png';
