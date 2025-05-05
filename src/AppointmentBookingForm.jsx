@@ -88,7 +88,7 @@ const AppointmentBookingForm = () => {
 
           <div>
   <label className="block text-sm font-semibold text-gray-700 mb-2">
-    Select Services <span className="text-xs text-gray-400">(You can select multiple)</span>
+    Selec Services <span className="text-xs text-gray-400">(You can select multiple)</span>
   </label>
   <div className="relative">
     <select
