@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import {
   AreaChart,
   Area,
@@ -25,6 +26,9 @@ const IdealWeightCalculator = () => {
   const [bmr, setBmr] = useState(null);
   const [bodyFat, setBodyFat] = useState(null);
   const [weightStatus, setWeightStatus] = useState('');
+  const [calculated, setCalculated] = useState(false); // Track if calculations are done
+
+  const navigate = useNavigate(); // Hook for navigation
 
   const round = (num) => parseFloat(num.toFixed(2));
 
@@ -52,13 +56,9 @@ const IdealWeightCalculator = () => {
           : 1.2 * (w / ((h / 100) ** 2)) + 0.23 * a - 5.4;
       setBodyFat(round(fatResult));
     }
-  };
 
-  const getStatusColor = () => {
-    if (weightStatus === 'Ideal Weight') return 'text-green-600';
-    if (weightStatus === 'Over Ideal Weight') return 'text-red-600';
-    if (weightStatus === 'Under Ideal Weight') return 'text-orange-500';
-    return '';
+    // After calculations, update state to show the 'Book Now' button
+    setCalculated(true);
   };
 
   const saveReport = async () => {
@@ -82,15 +82,17 @@ const IdealWeightCalculator = () => {
     }
   };
 
-  const chartData = [
-    { name: 'BMI', value: bmi || 0 },
-    { name: 'BMR', value: bmr || 0 },
-    { name: 'Body Fat %', value: bodyFat || 0 },
-    { name: 'Ideal Weight', value: idealWeight || 0 },
-  ];
+  const getStatusColor = () => {
+    if (weightStatus === 'Ideal Weight') return 'text-green-600';
+    if (weightStatus === 'Over Ideal Weight') return 'text-red-600';
+    if (weightStatus === 'Under Ideal Weight') return 'text-orange-500';
+    return '';
+  };
 
-  // Regular expression for phone number validation
-  const phoneNumberRegex = /^[0-9]{10}$/;  // Example for a 10-digit number
+  // Navigate to the booking page
+  const handleBookingRedirect = () => {
+    navigate('/book-appointment');
+  };
 
   return (
     <>
@@ -172,7 +174,17 @@ const IdealWeightCalculator = () => {
             </motion.button>
           </motion.div>
 
-          <div className="bg-indigo-50 p-4 rounded-xl shadow-inner">
+          {calculated && (
+            <motion.button
+              onClick={handleBookingRedirect} // Button to redirect to booking page
+              className="w-full mt-4 bg-green-600 text-white py-2 rounded-xl font-semibold"
+            >
+              Book Now
+            </motion.button>
+          )}
+
+          {/* Health Information Display */}
+          <div className="bg-indigo-50 p-4 rounded-xl shadow-inner mt-6">
             <table className="w-full text-left">
               <tbody>
                 <tr>
@@ -193,21 +205,20 @@ const IdealWeightCalculator = () => {
                 </tr>
                 <tr>
                   <td className="font-semibold py-1">Status:</td>
-                  <td className={getStatusColor()}>
-                    {weightStatus || 'Not Calculated'}
-                  </td>
+                  <td className={getStatusColor()}>{weightStatus || 'Not Calculated'}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
+          {/* Health Chart Display */}
           {bmi && bmr && (
             <div className="mt-6">
               <h3 className="text-center text-lg font-semibold mb-3">
                 Health Summary Chart
               </h3>
               <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={chartData}>
+                <AreaChart data={[{ name: 'BMI', value: bmi || 0 }, { name: 'BMR', value: bmr || 0 }, { name: 'Body Fat %', value: bodyFat || 0 }, { name: 'Ideal Weight', value: idealWeight || 0 }]}>
                   <defs>
                     <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8} />

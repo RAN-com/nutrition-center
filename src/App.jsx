@@ -28,7 +28,7 @@ function App() {
           <div className="flex items-center gap-2">
             <img src={logo} alt="Health App Logo" className="h-20" />
           </div>
-          <h1 className="text-3xl font-bold underline text-green-700">Nutrition Centre</h1>
+          <h1 className="text-2xl font-bold underline text-green-700">Nutrition Centre</h1>
         </header>
 
         <main className="container my-4">
