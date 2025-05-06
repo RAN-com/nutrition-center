@@ -129,7 +129,7 @@ const IdealWeightCalculator = () => {
           transition={{ duration: 0.6 }}
           className="bg-white shadow-2xl rounded-3xl p-6 max-w-7xl mx-auto border-t-4 border-indigo-400"
         >
-          <h2 className="text-3xl font-bold text-center mb-10 text-indigo-700">Nutrition Centre</h2>
+          <h2 className="text-3xl font-bold text-center mb-10 text-indigo-700">Check your Ideal Weight</h2>
 
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Form Section */}
