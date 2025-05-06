@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
 import {
   AreaChart,
   Area,
@@ -26,9 +26,10 @@ const IdealWeightCalculator = () => {
   const [bmr, setBmr] = useState(null);
   const [bodyFat, setBodyFat] = useState(null);
   const [weightStatus, setWeightStatus] = useState('');
-  const [calculated, setCalculated] = useState(false); // Track if calculations are done
+  const [calculated, setCalculated] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const round = (num) => parseFloat(num.toFixed(2));
 
@@ -57,7 +58,6 @@ const IdealWeightCalculator = () => {
       setBodyFat(round(fatResult));
     }
 
-    // After calculations, update state to show the 'Book Now' button
     setCalculated(true);
   };
 
@@ -89,9 +89,35 @@ const IdealWeightCalculator = () => {
     return '';
   };
 
-  // Navigate to the booking page
   const handleBookingRedirect = () => {
     navigate('/book-appointment');
+  };
+
+  const handleCalculateClick = () => {
+    if (!name || !height || !weight || !age || !phoneNumber) {
+      setFormError('All fields are required. Please complete the form.');
+      return;
+    }
+
+    setFormError('');
+    calculateAll();
+    saveReport();
+  };
+
+  const handleClearClick = () => {
+    setName('');
+    setHeight('');
+    setWeight('');
+    setAge('');
+    setPhoneNumber('');
+    setGender('male');
+    setIdealWeight(null);
+    setBmi(null);
+    setBmr(null);
+    setBodyFat(null);
+    setWeightStatus('');
+    setCalculated(false);
+    setFormError('');
   };
 
   return (
@@ -101,145 +127,154 @@ const IdealWeightCalculator = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white shadow-2xl rounded-3xl p-6 w-full max-w-lg mx-auto border-t-4 border-indigo-400"
+          className="bg-white shadow-2xl rounded-3xl p-6 max-w-7xl mx-auto border-t-4 border-indigo-400"
         >
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-2xl font-bold text-center mb-6 text-indigo-700"
-          >
-            Nutrition Centre
-          </motion.h2>
+          <h2 className="text-3xl font-bold text-center mb-10 text-indigo-700">Nutrition Centre</h2>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="space-y-4 mb-6"
-          >
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            />
-            <input
-              type="number"
-              placeholder="Height (cm)"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            />
-            <input
-              type="number"
-              placeholder="Weight (kg)"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            />
-            <input
-              type="number"
-              placeholder="Age"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            />
-            <input
-              type="text"
-              placeholder="Phone Number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            />
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full p-3 border rounded-xl"
-            >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                calculateAll();
-                saveReport();
-              }}
-              className="w-full mt-4 bg-indigo-600 text-white py-2 rounded-xl font-semibold"
-            >
-              Calculate All & Save
-            </motion.button>
-          </motion.div>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Form Section */}
+            <div className="flex-1 space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              />
+              <input
+                type="number"
+                placeholder="Height (cm)"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              />
+              <input
+                type="number"
+                placeholder="Weight (kg)"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              />
+              <input
+                type="number"
+                placeholder="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              />
+              <input
+                type="text"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              />
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full p-3 border rounded-xl"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
 
-          {calculated && (
-            <motion.button
-              onClick={handleBookingRedirect} // Button to redirect to booking page
-              className="w-full mt-4 bg-green-600 text-white py-2 rounded-xl font-semibold"
-            >
-              Book Now
-            </motion.button>
-          )}
+              {formError && (
+                <p className="text-red-600 text-sm text-center">{formError}</p>
+              )}
 
-          {/* Health Information Display */}
-          <div className="bg-indigo-50 p-4 rounded-xl shadow-inner mt-6">
-            <table className="w-full text-left">
-              <tbody>
-                <tr>
-                  <td className="font-semibold py-1">Ideal Weight:</td>
-                  <td>{idealWeight ? `${idealWeight} kg` : '-'}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">BMI:</td>
-                  <td>{bmi ? `${bmi}` : '-'}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">BMR:</td>
-                  <td>{bmr ? `${bmr} kcal/day` : '-'}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">Body Fat %:</td>
-                  <td>{bodyFat ? `${bodyFat}%` : '-'}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">Status:</td>
-                  <td className={getStatusColor()}>{weightStatus || 'Not Calculated'}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCalculateClick}
+                className="w-full bg-indigo-600 text-white py-2 rounded-xl font-semibold"
+              >
+                Report
+              </motion.button>
 
-          {/* Health Chart Display */}
-          {bmi && bmr && (
-            <div className="mt-6">
-              <h3 className="text-center text-lg font-semibold mb-3">
-                Health Summary Chart
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={[{ name: 'BMI', value: bmi || 0 }, { name: 'BMR', value: bmr || 0 }, { name: 'Body Fat %', value: bodyFat || 0 }, { name: 'Ideal Weight', value: idealWeight || 0 }]}>
-                  <defs>
-                    <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#6366F1"
-                    fillOpacity={1}
-                    fill="url(#colorVal)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {calculated && (
+                <motion.button
+                  onClick={handleBookingRedirect}
+                  className="w-full mt-4 bg-green-600 text-white py-2 rounded-xl font-semibold"
+                >
+                  Visits Our Centre
+                </motion.button>
+              )}
+
+              {/* Clear Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleClearClick}
+                className="w-full mt-4 bg-gray-600 text-white py-2 rounded-xl font-semibold"
+              >
+                Clear
+              </motion.button>
             </div>
-          )}
+
+            {/* Result Section */}
+            <div className="flex-1">
+              <div className="bg-indigo-50 p-4 rounded-xl shadow-inner mb-6">
+                <table className="w-full text-left">
+                  <tbody>
+                    <tr>
+                      <td className="font-semibold py-1">Ideal Weight:</td>
+                      <td>{idealWeight ? `${idealWeight} kg` : '-'}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold py-1">BMI:</td>
+                      <td>{bmi ? `${bmi}` : '-'}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold py-1">BMR:</td>
+                      <td>{bmr ? `${bmr} kcal/day` : '-'}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold py-1">Body Fat %:</td>
+                      <td>{bodyFat ? `${bodyFat}%` : '-'}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold py-1">Status:</td>
+                      <td className={getStatusColor()}>{weightStatus || 'Not Calculated'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {bmi && bmr && (
+                <>
+                  <h3 className="text-center text-lg font-semibold mb-3">Health Summary Chart</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart
+                      data={[ 
+                        { name: 'BMI', value: bmi || 0 },
+                        { name: 'BMR', value: bmr || 0 },
+                        { name: 'Body Fat %', value: bodyFat || 0 },
+                        { name: 'Ideal Weight', value: idealWeight || 0 },
+                      ]}
+                    >
+                      <defs>
+                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#6366F1"
+                        fillOpacity={1}
+                        fill="url(#colorVal)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </>
+              )}
+            </div>
+          </div>
         </motion.div>
       </div>
 

@@ -1,6 +1,13 @@
+// AdminScreen.js
 import React, { useEffect, useState } from 'react';
 import { db } from './Firebase';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
 
 const AdminScreen = () => {
   const [appointments, setAppointments] = useState([]);
@@ -20,11 +27,14 @@ const AdminScreen = () => {
 
   useEffect(() => {
     const fetchReports = async () => {
-      const snapshot = await getDocs(collection(db, 'reports'));
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setReports(data);
+      try {
+        const snapshot = await getDocs(collection(db, 'reports'));
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setReports(data);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      }
     };
-
     fetchReports();
   }, []);
 
@@ -32,7 +42,6 @@ const AdminScreen = () => {
     try {
       const appointmentRef = doc(db, 'appointments', id);
       await updateDoc(appointmentRef, { status: 'Completed' });
-
       setAppointments((prev) =>
         prev.map((appointment) =>
           appointment.id === id ? { ...appointment, status: 'Completed' } : appointment
@@ -43,9 +52,26 @@ const AdminScreen = () => {
     }
   };
 
+  const handleDeleteAppointment = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'appointments', id));
+      setAppointments((prev) => prev.filter((appt) => appt.id !== id));
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+    }
+  };
+
+  const handleDeleteReport = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'reports', id));
+      setReports((prev) => prev.filter((report) => report.id !== id));
+    } catch (error) {
+      console.error('Error deleting report:', error);
+    }
+  };
+
   const handleSendWhatsApp = (appointment) => {
     const { name, number, date, services = [] } = appointment;
-
     const message = `To: ${name}
 Date: ${date}
 Service: ${services.join(', ') || 'General Consultation'}
@@ -56,8 +82,6 @@ This is to confirm your appointment scheduled for ${date}, regarding your ${serv
 
 If you have any questions or need to reschedule, feel free to contact us in advance.
 
-Looking forward to assisting you in your health journey.
-
 Best regards,
 MrHealth Nutrition Centre`;
 
@@ -67,7 +91,6 @@ MrHealth Nutrition Centre`;
 
   const handleSendReportWhatsApp = (report) => {
     const { name, bmi, bmr, bodyFat, idealWeight, weightStatus, phoneNumber } = report;
-
     const message = `Health Report for ${name}:
 BMI: ${bmi}
 BMR: ${bmr}
@@ -87,13 +110,13 @@ MrHealth Nutrition Centre`;
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
       <h2 className="text-3xl font-bold text-center text-indigo-700 mb-6">Admin Panel</h2>
 
-      {/* Appointment List Section */}
+      {/* Appointment Section */}
       <h3 className="text-xl font-semibold mb-4 text-gray-700">Appointment List</h3>
-      <div className="overflow-auto bg-white rounded-xl shadow-lg mb-8">
-        <table className="min-w-full table-auto border text-sm">
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg mb-8">
+        <table className="min-w-full table-auto text-sm">
           <thead className="bg-indigo-600 text-white">
             <tr>
               <th className="p-2">Name</th>
@@ -111,7 +134,7 @@ MrHealth Nutrition Centre`;
                 <td className="p-2">{appointment.number}</td>
                 <td className="p-2">{appointment.date}</td>
                 <td className="p-2">
-                  {appointment.services && appointment.services.length > 0
+                  {appointment.services?.length
                     ? appointment.services.join(', ')
                     : 'None'}
                 </td>
@@ -127,9 +150,19 @@ MrHealth Nutrition Centre`;
                   )}
                   <button
                     onClick={() => handleSendWhatsApp(appointment)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 mr-2"
                   >
                     WhatsApp
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this appointment?')) {
+                        handleDeleteAppointment(appointment.id);
+                      }
+                    }}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -138,10 +171,10 @@ MrHealth Nutrition Centre`;
         </table>
       </div>
 
-      {/* Reports Section */}
+      {/* Report Section */}
       <h3 className="text-xl font-semibold mb-4 text-gray-700">Health Reports</h3>
-      <div className="overflow-auto bg-white rounded-xl shadow-lg">
-        <table className="min-w-full table-auto border text-sm">
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="min-w-full table-auto text-sm">
           <thead className="bg-indigo-600 text-white">
             <tr>
               <th className="p-2">Name</th>
@@ -161,21 +194,41 @@ MrHealth Nutrition Centre`;
             {reports.map((report) => (
               <tr key={report.id} className="border-t">
                 <td className="p-2">{report.name}</td>
-                <td className="p-2">{report.height}</td>
-                <td className="p-2">{report.weight}</td>
+                <td className="p-2">{report.height} cm</td>
+                <td className="p-2">{report.weight} kg</td>
                 <td className="p-2">{report.age}</td>
                 <td className="p-2 capitalize">{report.gender}</td>
                 <td className="p-2">{report.idealWeight} kg</td>
                 <td className="p-2">{report.bmi}</td>
                 <td className="p-2">{report.bmr}</td>
                 <td className="p-2">{report.bodyFat}%</td>
-                <td className="p-2 font-medium">{report.weightStatus}</td>
-                <td className="p-2">
+                <td
+                  className={`p-2 font-medium ${
+                    report.weightStatus === 'Ideal Weight'
+                      ? 'text-green-600'
+                      : report.weightStatus === 'Over Ideal Weight'
+                      ? 'text-red-600'
+                      : 'text-yellow-600'
+                  }`}
+                >
+                  {report.weightStatus}
+                </td>
+                <td className="p-2 flex flex-col gap-2">
                   <button
                     onClick={() => handleSendReportWhatsApp(report)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
                   >
-                    Send Report via WhatsApp
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this report?')) {
+                        handleDeleteReport(report.id);
+                      }
+                    }}
+                    className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>
